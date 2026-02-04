@@ -29,4 +29,4 @@ Thumbs.db
 .env
 
 # Large raw HTML (if you prefer not to push)
-# raw_html/
+raw_html/
