@@ -1,0 +1,152 @@
+【time wallet 起動】
+
+WSL
+
+【VS code内でコマンド実行するところはこの２行】
+npm run prod:build
+
+PORT=4000 DATA_DIR=/var/lib/timewallet npm run prod:start
+
+↑更新だけ（ポート転送やTailscale起動中）なら、これだけ実施。
+
+VS code内でポートの転送4000確認
+
+Windowsにして
+
+tailscale起動
+
+アンドロイド実機でもtailscale起動
+
+tailscaleつなぐ
+
+Powershell
+
+tailscale status
+
+→windows入ってるか確認
+
+【powershellでこの一行】
+tailscale serve --bg http://127.0.0.1:4000
+
+表示されたproxyでアンドロイドブラウザにアクセス
+
+→https://desktop-r1dnf1c-1.taile8307e.ts.net/
+こんなやつ
+
+【line bot】
+WSL
+
+npx wrangler deploy
+npx expo start --tunnel
+
+npx wrangler deploy
+npx expo start --tunnel --clear
+
+
+Reviewed Expo CLI flags and searched patterns
+Edited
+package.json+1-0
+cd /mnt/c/Users/user/expo-test-app && npm install -D cross-env
+ Enable shell integration to improve command detection
+
+Providing concise setup steps in Japanese
+原因は、Expo CLIが依存バージョン検証のために外部へ fetch して失敗している点です。tunnelのまま 検証フェッチを無効化できるスクリプトを追加しました。
+更新済み: package.json
+
+やること（これだけでOK）
+
+npm run start:tunnel
+これで EXPO_NO_DEPENDENCY_VALIDATION=1 が効き、同じエラーは回避されます。
+もしこの起動でまだ出る場合は、同じ内容を手動で実行してください（tunnel維持のまま）:
+
+EXPO_NO_DEPENDENCY_VALIDATION=1 EXPO_NO_TELEMETRY=1 npx expo start --tunnel --clear
+追加の判断コメント
+
+
+【競馬】
+
+今はwindows local環境（powershellからvenvを構築して）で実行中。
+chat gptと二人三脚で開発中
+実行はpythonで、セットアップとかの詳しいのはkeiba predictor 開発中コンテナ　で見れる。
+
+cd C:\Users\user\keiba-local2
+python -m venv .venv
+
+江坂
+cd C:\Users\musas\keiba-local2
+python -m venv .venv
+call .venv\Scripts\activate
+
+.\.venv\Scripts\Activate.ps1
+
+＜step0 calendarとrace list取得 取得＞
+python scripts/calendar_race_lis.py
+
+<step1 開催日ごとのrace idを年ごとに結合>
+python scripts\merge_race_id_by_year.py
+
+＜step2 レース結果のhtml全部 取得＞
+python scripts\download_race_result_html.py
+
+＜step3 レース結果htmlからjsonでパース＞
+python scripts\parse_race_result_batch.py
+
+＜step4 レース結果JSONからhosre id、jockey id、trainer id owner id取得　差分更新＞
+python scripts\update_masters.py
+
+＜step5 netkeiba DBから血統情報を直接パース＞
+python scripts\fetch_pedigree_5gen.py
+
+{古いバージョン}
+
+＜step0 race id 取得＞　2019以外もできるように拡張する。
+
+＜step1 race idにまつわるURL取得＞
+python crawler/race_html_downloader.py
+
+＜stepあと htmlからレース情報取得＞
+python scraper/race/parse_race_result.py
+
+
+【暗記テキスト】
+
+こちらも今はwindows local環境（powershellからvenvを構築して）で実行中。
+chat gptと二人三脚で開発中
+実行はpythonで、セットアップとかの詳しいのはvs code book pipeline　で見れる。
+
+powershell
+
+
+↓江坂PC
+仮想環境構築　python -m venv env\venv
+
+cd C:\Users\musas\OneDrive\デスクトップ\book_pipeline
+call env\venv\Scripts\activate なんかこっちしかできないpowershellだめよ。
+
+↓ノート
+cd C:\Users\user\book_pipeline
+call env\venv\Scripts\activate ←cmd用らしい
+正解は
+.\env\venv\Scripts\Activate.ps1
+
+step0 kindle pdf化
+
+venv
+python scripts\capture\kindle_capture_to_pdf.py
+
+
+python scripts\capture\kindle_capture_for_gdrive_ocr.py
+
+step1 google ドライブ経由後のdocxの結合
+
+
+python scripts/step1_docx/merge_and_normalize.py
+
+
+step2 docxから中間JSONにする。
+
+python scripts\step2_extract\docx_to_blocks.py
+
+step3a 分類する。
+
+python scripts\step3a_split\step3a_split.py
