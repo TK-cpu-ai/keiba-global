@@ -1,152 +1,67 @@
-【time wallet 起動】
-
-WSL
-
-【VS code内でコマンド実行するところはこの２行】
-npm run prod:build
-
-PORT=4000 DATA_DIR=/var/lib/timewallet npm run prod:start
-
-↑更新だけ（ポート転送やTailscale起動中）なら、これだけ実施。
-
-VS code内でポートの転送4000確認
-
-Windowsにして
-
-tailscale起動
-
-アンドロイド実機でもtailscale起動
-
-tailscaleつなぐ
-
-Powershell
-
-tailscale status
-
-→windows入ってるか確認
-
-【powershellでこの一行】
-tailscale serve --bg http://127.0.0.1:4000
-
-表示されたproxyでアンドロイドブラウザにアクセス
-
-→https://desktop-r1dnf1c-1.taile8307e.ts.net/
-こんなやつ
-
-【line bot】
-WSL
-
-npx wrangler deploy
-npx expo start --tunnel
-
-npx wrangler deploy
-npx expo start --tunnel --clear
-
-
-Reviewed Expo CLI flags and searched patterns
-Edited
-package.json+1-0
-cd /mnt/c/Users/user/expo-test-app && npm install -D cross-env
- Enable shell integration to improve command detection
-
-Providing concise setup steps in Japanese
-原因は、Expo CLIが依存バージョン検証のために外部へ fetch して失敗している点です。tunnelのまま 検証フェッチを無効化できるスクリプトを追加しました。
-更新済み: package.json
-
-やること（これだけでOK）
-
-npm run start:tunnel
-これで EXPO_NO_DEPENDENCY_VALIDATION=1 が効き、同じエラーは回避されます。
-もしこの起動でまだ出る場合は、同じ内容を手動で実行してください（tunnel維持のまま）:
-
-EXPO_NO_DEPENDENCY_VALIDATION=1 EXPO_NO_TELEMETRY=1 npx expo start --tunnel --clear
-追加の判断コメント
-
-
-【競馬】
-
-今はwindows local環境（powershellからvenvを構築して）で実行中。
-chat gptと二人三脚で開発中
-実行はpythonで、セットアップとかの詳しいのはkeiba predictor 開発中コンテナ　で見れる。
-
-cd C:\Users\user\keiba-local2
+cd C:\Users\user\keiba-local3
 python -m venv .venv
-
-江坂
-cd C:\Users\musas\keiba-local2
-python -m venv .venv
-call .venv\Scripts\activate
 
 .\.venv\Scripts\Activate.ps1
 
-＜step0 calendarとrace list取得 取得＞
-python scripts/calendar_race_lis.py
 
-<step1 開催日ごとのrace idを年ごとに結合>
-python scripts\merge_race_id_by_year.py
+Step1 raceID取得
 
-＜step2 レース結果のhtml全部 取得＞
-python scripts\download_race_result_html.py
+python scripts\scraping\race_id.py --start-year 2020 --end-year 2026
 
-＜step3 レース結果htmlからjsonでパース＞
-python scripts\parse_race_result_batch.py
+BASE_CALENDAR_URL = "https://race.netkeiba.com/top/calendar.html"
+BASE_RACE_LIST_SP = "https://race.sp.netkeiba.com/"
 
-＜step4 レース結果JSONからhosre id、jockey id、trainer id owner id取得　差分更新＞
-python scripts\update_masters.py
+START_YEAR = 2026
+END_YEAR = 2026
 
-＜step5 netkeiba DBから血統情報を直接パース＞
-python scripts\fetch_pedigree_5gen.py
+OUTPUT_BASE_DIR = Path("data/immutable/raw/race_id")
 
-{古いバージョン}
+Step2 race result取得(パース)
 
-＜step0 race id 取得＞　2019以外もできるように拡張する。
+一つの生HTMLを解析してパースにかじ切った
 
-＜step1 race idにまつわるURL取得＞
-python crawler/race_html_downloader.py
+python scripts\scraping\race_result.py --start-year 2020 --end-year 2026
 
-＜stepあと htmlからレース情報取得＞
-python scraper/race/parse_race_result.py
+RACE_ID_DIR = pathlib.Path("data/immutable/raw/race_id")
+OUTPUT_ROOT = pathlib.Path("data/immutable/raw/race_result")
+OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
+BASE_URL = "https://db.netkeiba.com/race/{}/"
 
-【暗記テキスト】
+Step3 馬、騎手、厩舎、生産者　id取得
 
-こちらも今はwindows local環境（powershellからvenvを構築して）で実行中。
-chat gptと二人三脚で開発中
-実行はpythonで、セットアップとかの詳しいのはvs code book pipeline　で見れる。
+python scripts\scraping\update_masters.py
 
-powershell
+RAW_JSON_ROOT = PROJECT_ROOT / "data" / "immutable" / "raw" / "race_result"
+MASTERS_DIR = PROJECT_ROOT / "data" / "immutable" / "masters"
+INDEXES_DIR = PROJECT_ROOT / "data" / "immutable" / "indexes"
 
+MASTERS_DIR.mkdir(parents=True, exist_ok=True)
+INDEXES_DIR.mkdir(parents=True, exist_ok=True)
 
-↓江坂PC
-仮想環境構築　python -m venv env\venv
+SEEN_RACE_IDS_PATH = INDEXES_DIR / "seen_race_ids.json"
 
-cd C:\Users\musas\OneDrive\デスクトップ\book_pipeline
-call env\venv\Scripts\activate なんかこっちしかできないpowershellだめよ。
+HORSES_PATH = MASTERS_DIR / "horses.json"
+JOCKEYS_PATH = MASTERS_DIR / "jockeys.json"
+TRAINERS_PATH = MASTERS_DIR / "trainers.json"
+OWNERS_PATH = MASTERS_DIR / "owners.json"
 
-↓ノート
-cd C:\Users\user\book_pipeline
-call env\venv\Scripts\activate ←cmd用らしい
-正解は
-.\env\venv\Scripts\Activate.ps1
+Step4 血統情報取得
 
-step0 kindle pdf化
+python scripts\scraping\fetch_pedigree_5gen.py
 
-venv
-python scripts\capture\kindle_capture_to_pdf.py
+BASE_URL = "https://db.netkeiba.com/horse/ped/"
 
+MASTER_PATH = Path("data/immutable/masters/horses.json")
+PED_DIR = Path("data/immutable/pedigree")
+PED_DIR.mkdir(parents=True, exist_ok=True)
 
-python scripts\capture\kindle_capture_for_gdrive_ocr.py
+PKL_PATH = PED_DIR / "peds_5gen.pkl"
+JSON_PATH = PED_DIR / "peds_5gen.json"
 
-step1 google ドライブ経由後のdocxの結合
+Step5 DataFrame作成（PDCA開始）
 
+python scripts\pdca\build_dataframe.py --start-year 2020 --end-year 2026 --dataset-version df_v001
 
-python scripts/step1_docx/merge_and_normalize.py
-
-
-step2 docxから中間JSONにする。
-
-python scripts\step2_extract\docx_to_blocks.py
-
-step3a 分類する。
-
-python scripts\step3a_split\step3a_split.py
+出力先:
+data\working\datasets\df_v001\

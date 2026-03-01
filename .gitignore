@@ -31,3 +31,11 @@ Thumbs.db
 
 # Large raw HTML (if you prefer not to push)
 raw_html/
+
+# Mutable working artifacts (B)
+data/working/datasets/
+data/working/experiments/
+
+# DS artifacts
+*.pkl
+*.parquet

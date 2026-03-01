@@ -1,0 +1,14 @@
+{
+  "criteria": {
+    "overall_logloss_improve_pct_min": 0.5,
+    "year_improve_count_min": 2,
+    "brier_not_worse": true
+  },
+  "actual": {
+    "overall_logloss_improve_pct_b1_vs_b0": 0.03208772255722081,
+    "year_improve_count": 2,
+    "year_count": 3,
+    "overall_brier_delta_b1_minus_b0": -2.505095271640445e-05
+  },
+  "result": "NO_GO_TRY_B2"
+}

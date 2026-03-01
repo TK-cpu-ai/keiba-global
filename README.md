@@ -1,29 +1,34 @@
-# keiba-local2
+# keiba-local3
 
-ローカルの競馬データ（HTML 等）を管理するリポジトリです。
+競馬データ収集とモデリングのためのローカルワークスペースです。
 
-リポジトリ: https://github.com/TK-cpu-ai/keiba-local2
+## ディレクトリ方針（A/B分離）
 
-初回セットアップ（ローカル → GitHub に push）:
+- A（固定資産）: `data/immutable/`
+	- `raw/race_id/`
+	- `raw/race_result/`
+	- `masters/`
+	- `pedigree/`
+- B（再生成資産）: `data/working/`
+	- `datasets/<dataset_version>/`
+	- `experiments/<exp_name>/`
+
+詳細は [docs/data_layout.md](docs/data_layout.md) を参照してください。
+PDCA運用は [docs/pdca_playbook.md](docs/pdca_playbook.md) を参照してください。
+
+## セットアップ
 
 ```bash
-cd /d C:\Users\user\keiba-local2
-git init
-git add .
-git commit -m "Initial import"
-git branch -M main
-git remote add origin https://github.com/TK-cpu-ai/keiba-local2.git
-git push -u origin main
-```
-
-別端末で引き継ぐ（クローン）:
-
-```bash
-git clone https://github.com/TK-cpu-ai/keiba-local2.git
-cd keiba-local2
 pip install -r requirements.txt
 ```
 
-注意:
-- プライベートリポジトリの場合は認証（HTTPS または SSH）を行ってください。
-- 大きなファイルが多い場合は Git LFS の導入を検討してください。
+## 実行例
+
+```bash
+python scripts/scraping/race_id.py --start-year 2020 --end-year 2026
+python scripts/scraping/race_result.py --start-year 2020 --end-year 2026
+python scripts/scraping/update_masters.py
+python scripts/scraping/fetch_pedigree_5gen.py
+
+python scripts/pdca/build_dataframe.py --start-year 2020 --end-year 2026 --dataset-version df_v001
+```
